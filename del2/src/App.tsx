@@ -65,16 +65,22 @@ const evaluateData = ({
 type State = NumData & {
 	currentPrize: number
 	goalNum: number
+	stage: number
 }
 
 const reducer: Reducer<State, Action> = (state, { type }) => {
 	switch (type) {
 		case 'up': {
-			const value = { ...state, history: [...state.history, true] }
+			const value = {
+				...state,
+				stage: state.stage + 1,
+				history: [...state.history, true],
+			}
 
 			const data = evaluateData(value)
 
-			if (data === JOKER) return { ...value, currentPrize: LARGEST_PRIZE }
+			if (data === JOKER)
+				return { ...value, stage: 5, currentPrize: LARGEST_PRIZE }
 
 			if (data >= state.goalNum)
 				return { ...value, currentPrize: value.currentPrize + 1 }
@@ -83,11 +89,16 @@ const reducer: Reducer<State, Action> = (state, { type }) => {
 		}
 
 		case 'down': {
-			const value = { ...state, history: [...state.history, false] }
+			const value = {
+				...state,
+				stage: state.stage + 1,
+				history: [...state.history, false],
+			}
 
 			const data = evaluateData(value)
 
-			if (data === JOKER) return { ...value, currentPrize: LARGEST_PRIZE }
+			if (data === JOKER)
+				return { ...value, stage: 5, currentPrize: LARGEST_PRIZE }
 
 			if (data <= state.goalNum)
 				return { ...value, currentPrize: value.currentPrize + 1 }
@@ -121,6 +132,7 @@ function App() {
 			],
 			history: [],
 			currentPrize: 0,
+			stage: 0,
 		},
 		(init: State) => {
 			// do {
@@ -140,31 +152,45 @@ function App() {
 		console.log(state)
 	}, [state])
 
+	const inverseStage = 4 - state.stage
+
 	return (
 		<main>
 			<h1>Joker</h1>
 			<div className='main'>
-				<div className='top'></div>
-				<div className='top'></div>
-				<div className='top'></div>
-				<div className='top'></div>
-				<div
-					className='top selected'
-					onClick={() => dispatch({ type: 'up' })}></div>
+				{[...Array(5).keys()].map((x) =>
+					x === inverseStage ? (
+						<div
+							className='top selected'
+							onClick={() => dispatch({ type: 'up' })}></div>
+					) : state.history[4 - x] ? (
+						<div className={`top ${state.data[1][x] === JOKER && 'joker'}`}>
+							{state.data[1][x]}
+						</div>
+					) : (
+						<div className='concealed'></div>
+					)
+				)}
 
-				{[...`${state.initialNum}`.padStart(5,'0')].map((x, index) => (
+				{[...`${state.initialNum}`.padStart(5, '0')].map((x, index) => (
 					<div className='num' key={`${index}-num`}>
 						{x}
 					</div>
 				))}
 
-				<div className='bot'></div>
-				<div className='bot'></div>
-				<div className='bot'></div>
-				<div className='bot'></div>
-				<div
-					className='bot selected'
-					onClick={() => dispatch({ type: 'down' })}></div>
+				{[...Array(5).keys()].map((x) =>
+					x === inverseStage ? (
+						<div
+							className='bot selected'
+							onClick={() => dispatch({ type: 'down' })}></div>
+					) : state.history[4 - x] === false ? (
+						<div className={`bot ${state.data[0][x] === JOKER && 'joker'}`}>
+							{state.data[0][x]}
+						</div>
+					) : (
+						<div className='concealed'></div>
+					)
+				)}
 			</div>
 			<div className='premier'>
 				<div

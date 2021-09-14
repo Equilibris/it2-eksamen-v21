@@ -55,6 +55,14 @@ main {
 
 		border: 3px solid #0005;
 
+		&.concealed {
+			opacity: 0;
+		}
+
+		&.joker {
+			background-color: $trim-2;
+		}
+
 		&.selected {
 			background-color: $trim-1;
 

@@ -20,6 +20,8 @@ main {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	flex-direction: column;
+	gap: 10px;
 
 	background-color: $main;
 
@@ -83,5 +85,118 @@ main {
 			@include button;
 			text-align: center;
 		}
+	}
+
+	&.anim {
+		animation: conceal-show 1s ease-in-out;
+
+		pointer-events: none;
+		user-select: none;
+	}
+}
+
+@keyframes conceal-show {
+	0% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	40% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	60% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.progress {
+	width: 70vw;
+	background-color: $alt;
+
+	border-radius: 10000vmax;
+	overflow: hidden;
+
+	display: flex;
+
+	position: relative;
+
+	&.blur::after {
+		content: '';
+
+		position: absolute;
+
+		inset: 0px;
+
+		z-index: 999;
+
+		filter: blur(20px);
+	}
+
+	> div {
+		height: 30px;
+
+		transition: all 1s;
+	}
+
+	.main-progress {
+		background-color: $trim-1;
+
+		border-radius: 10000vmax;
+	}
+
+	.element {
+		flex: 1;
+
+		&.correct {
+			background-color: $trim-1;
+		}
+		&.incorrect {
+			animation: anim-to-incorrect 1s ease-in-out 1s;
+
+			animation-fill-mode: both;
+		}
+	}
+}
+
+@keyframes anim-to-incorrect {
+	0% {
+		background-color: $trim-1;
+	}
+	100% {
+		background-color: $trim-2;
+	}
+}
+
+.results {
+	h1 {
+		text-align: center;
+	}
+	.result-text {
+		animation: slide-in 1s ease-in-out 1s;
+
+		animation-fill-mode: both;
+
+		&.won {
+			color: $trim-1;
+		}
+		&:not(.won) {
+			color: $trim-2;
+		}
+	}
+}
+
+@keyframes slide-in {
+	0% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }

@@ -1,4 +1,10 @@
-import { Reducer, useEffect, useReducer, useRef, useState } from 'react'
+import { Reducer, useEffect, useReducer } from 'react'
+
+import jokerimg from './assets/joker.png'
+
+import jokeradu from './assets/joker.mp3'
+import feiladu from './assets/feil.mp3'
+import riktigadu from './assets/riktig.mp3'
 
 const randomDigit = () => Math.round(Math.random() * 9)
 
@@ -19,23 +25,6 @@ type NumData = {
 	history: boolean[]
 }
 
-// const evaluateData = ({ data, history, initialNum }: NumData) => {
-// 	const evaluatedHistory = history.map((x, index) => data[+x][index])
-
-// 	let val = 0
-// 	let index = 0
-
-// 	for (const element of evaluatedHistory) {
-// 		if (element === JOKER) return JOKER
-
-// 		val += element * 10 ** (evaluatedHistory.length - index - 1)
-// 		index++
-// 	}
-// 	const dropDigits = 10 ** evaluatedHistory.length
-
-// 	return Math.floor(initialNum / dropDigits) * dropDigits + val
-// }
-
 const evaluateData = ({
 	data: [[...a], [...b]],
 	history: [...history],
@@ -43,9 +32,11 @@ const evaluateData = ({
 }: NumData): DataElement => {
 	const el = [a.pop(), b.pop()]
 
-	const current = history.pop()
+	if (history.length === 0) return initialNum
 
-	if ([el[0], el[1], current].includes(undefined)) return initialNum
+	const current = history.shift()
+
+	console.log(current, el)
 
 	const value = el[+current!]
 
@@ -59,6 +50,9 @@ const evaluateData = ({
 
 	if (typeof next === 'number' && typeof value === 'number')
 		return value + next * 10
+	else {
+		console.log({ value, next })
+	}
 	return JOKER
 }
 
@@ -66,6 +60,11 @@ type State = NumData & {
 	currentPrize: number
 	goalNum: number
 	stage: number
+}
+
+const playAudio = (url: string) => {
+	const audio = new Audio(url)
+	audio.play()
 }
 
 const reducer: Reducer<State, Action> = (state, { type }) => {
@@ -79,13 +78,18 @@ const reducer: Reducer<State, Action> = (state, { type }) => {
 
 			const data = evaluateData(value)
 
-			if (data === JOKER)
+			if (data === JOKER) {
+				playAudio(jokeradu)
 				return { ...value, stage: 5, currentPrize: LARGEST_PRIZE }
+			}
 
-			if (data >= state.goalNum)
+			if (data >= state.goalNum) {
+				playAudio(riktigadu)
 				return { ...value, currentPrize: value.currentPrize + 1 }
-			else
+			} else {
+				playAudio(feiladu)
 				return { ...value, currentPrize: Math.max(value.currentPrize - 1, 0) }
+			}
 		}
 
 		case 'down': {
@@ -97,13 +101,17 @@ const reducer: Reducer<State, Action> = (state, { type }) => {
 
 			const data = evaluateData(value)
 
-			if (data === JOKER)
+			if (data === JOKER) {
+				playAudio(jokeradu)
 				return { ...value, stage: 5, currentPrize: LARGEST_PRIZE }
-
-			if (data <= state.goalNum)
+			}
+			if (data <= state.goalNum) {
+				playAudio(riktigadu)
 				return { ...value, currentPrize: value.currentPrize + 1 }
-			else
+			} else {
+				playAudio(feiladu)
 				return { ...value, currentPrize: Math.max(value.currentPrize - 1, 0) }
+			}
 		}
 	}
 }
@@ -139,7 +147,7 @@ function App() {
 			init.initialNum = Math.round(Math.random() * 99999)
 			// } while (init.initialNum === init.goalNum)
 
-			init.data[Math.round(Math.random())][Math.round(Math.random() * 5)] =
+			init.data[Math.round(Math.random())][Math.round(Math.random() * 4)] =
 				JOKER
 
 			console.log(init)
@@ -165,7 +173,11 @@ function App() {
 							onClick={() => dispatch({ type: 'up' })}></div>
 					) : state.history[4 - x] ? (
 						<div className={`top ${state.data[1][x] === JOKER && 'joker'}`}>
-							{state.data[1][x]}
+							{state.data[1][x] === JOKER ? (
+								<img src={jokerimg} alt='joker!' />
+							) : (
+								state.data[1][x]
+							)}
 						</div>
 					) : (
 						<div className='concealed'></div>
@@ -185,7 +197,11 @@ function App() {
 							onClick={() => dispatch({ type: 'down' })}></div>
 					) : state.history[4 - x] === false ? (
 						<div className={`bot ${state.data[0][x] === JOKER && 'joker'}`}>
-							{state.data[0][x]}
+							{state.data[0][x] === JOKER ? (
+								<img src={jokerimg} alt='joker!' />
+							) : (
+								state.data[0][x]
+							)}
 						</div>
 					) : (
 						<div className='concealed'></div>

@@ -61,6 +61,10 @@ main {
 
 		&.joker {
 			background-color: $trim-2;
+
+			img {
+				width: 70%;
+			}
 		}
 
 		&.selected {
